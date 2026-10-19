@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Allerta Meteo Milano</title>
-
 <style>
 html,body{
     margin:0;
@@ -62,14 +60,6 @@ html,body{
     text-align:center;
     font-size:11px;
     color:#666;
-}
-
-.fonte{
-    margin-top:6px;
-    font-size:9px;
-    color:#888;
-    line-height:1.2;
-    word-break:break-all;
 }
 </style>
 </head>
@@ -152,15 +142,8 @@ async function aggiorna(){
 
             <div class="footer">
                 ${d.bulletin_info.data_bollettino}
-                &nbsp;
                 ${d.bulletin_info.ora_bollettino}
-
-                <div class="fonte">
-                    Fonte: AllertaMeteo.app / Protezione Civile<br>
-                    https://allertameteo.app/lombardia/milano/milano
-                </div>
             </div>
-
         `;
 
     }
@@ -177,7 +160,7 @@ aggiorna();
 
 setInterval(
     aggiorna,
-    900000
+    900001
 );
 
 </script>
