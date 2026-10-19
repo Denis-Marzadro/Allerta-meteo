@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+html,body{
+    margin:0;
+    padding:0;
+    background:white;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+.widget{
+    width:300px;
+    height:300px;
+    box-sizing:border-box;
+    border:1px solid #d9d9d9;
+    border-radius:12px;
+    padding:14px;
+    overflow:hidden;
+    background:white;
+}
+
+.titolo{
+    text-align:center;
+    font-size:22px;
+    font-weight:700;
+}
+
+.zona{
+    text-align:center;
+    font-size:11px;
+    color:#666;
+}
+
+.dot{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    margin:12px auto;
+}
+
+.stato{
+    text-align:center;
+    font-size:18px;
+    font-weight:700;
+}
+
+.riga{
+    font-size:13px;
+    margin:8px 0;
+}
+
+.footer{
+    margin-top:10px;
+    border-top:1px solid #eee;
+    padding-top:8px;
+    text-align:center;
+    font-size:11px;
+    color:#666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="widget">
+    <div id="contenuto">Caricamento...</div>
+</div>
+
+<script>
+
+function semaforo(colore){
+    switch(colore){
+        case "rosso":
+            return "#d32f2f";
+        case "arancione":
+            return "#ef6c00";
+        case "giallo":
+            return "#fbc02d";
+        default:
+            return "#2e7d32";
+    }
+}
+
+async function aggiorna(){
+
+    try{
+
+        const response = await fetch(
+            "https://allertameteo.app/api/alert/Milano"
+        );
+
+        const json = await response.json();
+        const d = json.data;
+
+        const colore = semaforo(
+            d.oggi.allerta.colore.toLowerCase()
+        );
+
+        document.getElementById("contenuto").innerHTML = `
+
+            <div class="titolo">
+                Milano
+            </div>
+
+            <div class="zona">
+                ${d.zona}
+            </div>
+
+            <div class="dot"
+                 style="background:${colore}">
+            </div>
+
+            <div class="stato"
+                 style="color:${colore}">
+                 ${d.oggi.allerta.descrizione}
+            </div>
+
+            <div class="riga">
+                🌊 Idraulico
+                <span style="color:${colore};font-weight:bold">
+                ●
+                </span>
+            </div>
+
+            <div class="riga">
+                ⛈️ Temporali
+                <span style="color:${colore};font-weight:bold">
+                ●
+                </span>
+            </div>
+
+            <div class="riga">
+                ⛰️ Idrogeologico
+                <span style="color:${colore};font-weight:bold">
+                ●
+                </span>
+            </div>
+
+            <div class="footer">
+                ${d.bulletin_info.data_bollettino}
+                ${d.bulletin_info.ora_bollettino}
+            </div>
+        `;
+
+    }
+    catch(e){
+
+        document.getElementById("contenuto").innerHTML =
+        "Errore caricamento dati";
+
+    }
+
+}
+
+aggiorna();
+
+setInterval(
+    aggiorna,
+    900000
+);
+
+</script>
+
+</body>
+</html>
+``
