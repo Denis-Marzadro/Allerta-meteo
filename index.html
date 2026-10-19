@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Allerta Meteo Milano</title>
-
 <style>
-
 html,body{
     margin:0;
     padding:0;
@@ -16,64 +13,77 @@ html,body{
 }
 
 .widget{
-    width:300px;
-    height:300px;
+    width:340px;
+    border:1px solid #d0d0d0;
+    border-radius:16px;
+    padding:15px;
     box-sizing:border-box;
-    padding:14px;
-    border:1px solid #d9d9d9;
-    border-radius:12px;
-    background:#ffffff;
 }
 
 .titolo{
     text-align:center;
-    font-size:22px;
+    font-size:20px;
     font-weight:700;
+    margin-bottom:4px;
 }
 
 .zona{
     text-align:center;
-    font-size:11px;
     color:#666;
-    margin-top:2px;
-}
-
-.semaforo{
-    width:85px;
-    height:85px;
-    border-radius:50%;
-    margin:12px auto;
-    box-shadow:0 0 8px rgba(0,0,0,.15);
-}
-
-.stato{
-    text-align:center;
-    font-size:18px;
-    font-weight:700;
+    font-size:13px;
     margin-bottom:12px;
 }
 
+.giorno{
+    border-top:1px solid #e5e5e5;
+    padding-top:10px;
+    margin-top:10px;
+}
+
+.giorno:first-of-type{
+    border-top:none;
+    margin-top:0;
+    padding-top:0;
+}
+
+.giorno-title{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:8px;
+    color:#222;
+}
+
 .riga{
-    font-size:13px;
-    margin:7px 0;
+    margin:6px 0;
+    font-size:15px;
+}
+
+.badge{
+    font-weight:700;
+}
+
+.verde{
+    color:#2e7d32;
+}
+
+.giallo{
+    color:#f9a825;
+}
+
+.arancione{
+    color:#ef6c00;
+}
+
+.rosso{
+    color:#c62828;
 }
 
 .footer{
-    margin-top:10px;
-    padding-top:8px;
-    border-top:1px solid #eeeeee;
-    font-size:11px;
+    margin-top:12px;
+    font-size:12px;
     color:#666;
     text-align:center;
 }
-
-.fonte{
-    margin-top:4px;
-    font-size:10px;
-    color:#888;
-    text-align:center;
-}
-
 </style>
 </head>
 
@@ -81,101 +91,118 @@ html,body{
 
 <div class="widget">
     <div id="contenuto">
-        Caricamento bollettino...
+        Caricamento...
     </div>
 </div>
 
 <script>
 
-function coloreAllerta(colore){
+function classeLivello(valore){
 
-    switch((colore || "").toLowerCase()){
+    if(!valore) return "verde";
 
-        case "rosso":
-            return "#d32f2f";
+    valore = valore.toLowerCase();
 
-        case "arancione":
-            return "#ef6c00";
+    if(valore.includes("ross")) return "rosso";
+    if(valore.includes("aranc")) return "arancione";
+    if(valore.includes("giall")) return "giallo";
 
-        case "giallo":
-            return "#fbc02d";
+    return "verde";
+}
 
-        default:
-            return "#2e7d32";
-    }
+function livello(v){
+    const c = classeLivello(v);
+
+    return `<span class="badge ${c}">${v || "Verde"}</span>`;
+}
+
+function blocco(titolo,d){
+
+    if(!d) return "";
+
+    return `
+        <div class="giorno">
+            <div class="giorno-title">${titolo}</div>
+
+            <div class="riga">
+                🌊 Idraulico:
+                ${livello(d.idraulico || d.hydraulic)}
+            </div>
+
+            <div class="riga">
+                ⛈️ Temporali:
+                ${livello(d.temporali || d.thunderstorms)}
+            </div>
+
+            <div class="riga">
+                ⛰️ Idrogeologico:
+                ${livello(d.idrogeologico || d.hydrogeological)}
+            </div>
+        </div>
+    `;
 }
 
 async function aggiorna(){
 
     try{
 
-        const response =
-            await fetch("https://allertameteo.app/api/alert/Milano");
-
-        const json = await response.json();
-
-        const d = json.data;
-
-        const colore = coloreAllerta(
-            d.oggi.allerta.colore
+        const response = await fetch(
+            "https://allertameteo.app/api/alert/Milano"
         );
 
+        const data = await response.json();
+
+        const oggi =
+            data.oggi ||
+            data.today ||
+            data.current ||
+            null;
+
+        const domani =
+            data.domani ||
+            data.tomorrow ||
+            data.nextDay ||
+            null;
+
+        const comune =
+            data.comune ||
+            "Milano";
+
+        const zona =
+            data.zona ||
+            data.alertZone ||
+            "Nodo Idraulico di Milano";
+
+        const aggiornamento =
+            data.aggiornato ||
+            data.updatedAt ||
+            "";
+
         document.getElementById("contenuto").innerHTML = `
+            <div class="titolo">${comune}</div>
 
-            <div class="titolo">
-                Milano
-            </div>
+            <div class="zona">${zona}</div>
 
-            <div class="zona">
-                ${d.zona}
-            </div>
+            ${blocco("OGGI", oggi)}
 
-            <div class="semaforo"
-                 style="background:${colore}">
-            </div>
-
-            <div class="stato"
-                 style="color:${colore}">
-                 ${d.oggi.allerta.descrizione}
-            </div>
-
-            <div class="riga">
-                🌊 Idraulico
-                <span style="color:${colore};font-weight:bold;">●</span>
-            </div>
-
-            <div class="riga">
-                ⛈️ Temporali
-                <span style="color:${colore};font-weight:bold;">●</span>
-            </div>
-
-            <div class="riga">
-                ⛰️ Idrogeologico
-                <span style="color:${colore};font-weight:bold;">●</span>
-            </div>
+            ${blocco("DOMANI", domani)}
 
             <div class="footer">
-                ${d.bulletin_info.data_bollettino}
-                &nbsp;
-                ${d.bulletin_info.ora_bollettino}
-            </div>
-
-            <div class="fonte">
+                ${aggiornamento}<br>
                 Fonte: AllertaMeteo.app / Protezione Civile
             </div>
-
         `;
 
-    }
-    catch(err){
+    }catch(err){
 
         document.getElementById("contenuto").innerHTML =
-        "<div style='padding:20px;text-align:center'>Errore caricamento dati</div>";
+            "<b>Errore nel caricamento del bollettino</b>";
+
+        console.error(err);
     }
 }
 
 aggiorna();
-
 setInterval(aggiorna, 900000);
 
 </script>
