@@ -4,13 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Allerta Meteo Milano</title>
-
 <style>
 html,body{
     margin:0;
     padding:0;
-    background:#ffffff;
+    background:white;
     font-family:Segoe UI,Arial,sans-serif;
 }
 
@@ -63,21 +61,6 @@ html,body{
     font-size:11px;
     color:#666;
 }
-
-.fonte{
-    margin-top:4px;
-    font-size:10px;
-    text-align:center;
-}
-
-.fonte a{
-    color:#1976d2;
-    text-decoration:none;
-}
-
-.fonte a:hover{
-    text-decoration:underline;
-}
 </style>
 </head>
 
@@ -106,18 +89,16 @@ async function aggiorna(){
 
     try{
 
-        const response =
-            await fetch(
-                "https://allertameteo.app/api/alert/Milano"
-            );
+        const response = await fetch(
+            "https://allertameteo.app/api/alert/Milano"
+        );
 
         const json = await response.json();
         const d = json.data;
 
-        const colore =
-            semaforo(
-                d.oggi.allerta.colore.toLowerCase()
-            );
+        const colore = semaforo(
+            d.oggi.allerta.colore.toLowerCase()
+        );
 
         document.getElementById("contenuto").innerHTML = `
 
@@ -161,17 +142,8 @@ async function aggiorna(){
 
             <div class="footer">
                 ${d.bulletin_info.data_bollettino}
-                &nbsp;
                 ${d.bulletin_info.ora_bollettino}
             </div>
-
-            <div class="fonte">
-                <a href="https://allertameteo.app/lombardia/milano/milano"
-                   target="_blank">
-                   Fonte: AllertaMeteo.app / Protezione Civile
-                </a>
-            </div>
-
         `;
 
     }
